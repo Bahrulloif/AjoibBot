@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  # PostgreSQL база данных
+  postgres:
+    image: postgres:15
+    container_name: ajoibbot-postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: ajoibbot
+    ports:
+      - "5433:5432"  # 5433 снаружи, чтобы не конфликтовать с твоим локальным PostgreSQL
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # данные хранятся вне контейнера
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+
+  # Admin API
+  api:
+    image: ajoibbot-admin-api
+    container_name: ajoibbot-api
+    ports:
+      - "8080:8080"  # снаружи:внутри контейнера
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=ajoibbot;Username=admin;Password=admin123
+      - Jwt__Key=AjoibBotSuperSecretKey12345678901234
+      - Jwt__Issuer=AjoibBot
+      - Jwt__Audience=AjoibBotUsers
+      - Jwt__ExpiresInMinutes=60
+    depends_on:
+      - postgres  # API стартует только после PostgreSQL
+
+volumes:
+  postgres_data:  # именованный volume для хранения данных БД
