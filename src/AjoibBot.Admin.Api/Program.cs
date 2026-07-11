@@ -2,6 +2,7 @@ using AjoibBot.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using AjoibBot.Infrastructure.Services.Auth;
 using Serilog;
+using AjoibBot.Infrastructure.Services;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var builder = WebApplication.CreateBuilder(args);
@@ -53,6 +54,14 @@ builder.Host.UseSerilog();
 builder.Services.AddScoped<ProductDapperRepository>(_ =>
     new ProductDapperRepository(connectionString));
 builder.Services.AddAuthorization();
+// Redis кэширование
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = "localhost:6379";
+    options.InstanceName = "AjoibBot:";
+});
+builder.Services.AddScoped<CachedProductService>();
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
