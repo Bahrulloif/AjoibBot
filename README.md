@@ -16,6 +16,7 @@ Telegram-бот для магазина детской одежды + Admin REST
 - **Backend:** ASP.NET Core 10, C#
 - **ORM:** Entity Framework Core + Dapper
 - **LLM:** OpenAI (Chat Completions + function calling) — диалог бота с покупателем
+- **gRPC:** Grpc.AspNetCore + reflection (для grpcurl) — сервис товаров
 - **База данных:** PostgreSQL
 - **Авторизация:** JWT Bearer tokens
 - **Документация:** Swagger / OpenAPI
@@ -29,6 +30,7 @@ Telegram-бот для магазина детской одежды + Admin REST
 AjoibBot/
 ├── AjoibBot.API            # Telegram Bot (Worker Service) + диалог через OpenAI
 ├── AjoibBot.Admin.Api      # REST API + JWT + Swagger
+├── AjoibBot.Grpc           # gRPC-сервис товаров (ProductService)
 ├── AjoibBot.Application    # Сущности, интерфейсы, DTO
 ├── AjoibBot.Infrastructure # EF Core, Dapper, репозитории
 └── AjoibBot.Tests          # Unit тесты (xUnit + Moq)
@@ -77,9 +79,27 @@ dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Po
 dotnet user-secrets set "OpenAI:ApiKey" "your_openai_api_key"
 cd ../..
 
+# Установи секреты gRPC-сервиса
+cd src/AjoibBot.Grpc
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Port=5432;Database=postgres;Username=admin;Password="
+cd ../..
+
 # Запусти
 dotnet run --project src/AjoibBot.Admin.Api
 dotnet run --project src/AjoibBot.API
+dotnet run --project src/AjoibBot.Grpc
+```
+
+## gRPC-сервис товаров
+
+`AjoibBot.Grpc` отдаёт каталог по gRPC (`products.ProductService`), слушает
+`http://localhost:5059` (см. `src/AjoibBot.Grpc/Properties/launchSettings.json`).
+В Development включена gRPC reflection — сервис можно достучаться `grpcurl` без
+`.proto`-файла на клиенте:
+
+```bash
+grpcurl -plaintext -d '{}' localhost:5059 products.ProductService/GetAll
+grpcurl -plaintext -d '{"id": 1}' localhost:5059 products.ProductService/GetById
 ```
 
 ## API эндпоинты
