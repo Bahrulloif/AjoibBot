@@ -1,7 +1,5 @@
 using AjoibBot.Application.Entities;
-
-
-namespace AjoibBot.Infrastructure.Data;
+namespace AjoibBot.Application.Interfaces;
 
 
 public interface IProductRepository

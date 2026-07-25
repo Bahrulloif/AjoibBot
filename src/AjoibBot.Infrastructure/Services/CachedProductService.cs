@@ -1,5 +1,6 @@
 using System.Text.Json;
 using AjoibBot.Application.Entities;
+using AjoibBot.Application.Interfaces;
 using AjoibBot.Infrastructure.Data;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;

@@ -1,3 +1,4 @@
+using AjoibBot.Application.Interfaces;
 using AjoibBot.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using AjoibBot.Infrastructure.Services.Auth;

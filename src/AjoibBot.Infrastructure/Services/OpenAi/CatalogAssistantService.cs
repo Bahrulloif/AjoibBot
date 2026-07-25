@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 using AjoibBot.Application.Entities;
+using AjoibBot.Application.Interfaces;
 using AjoibBot.Infrastructure.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

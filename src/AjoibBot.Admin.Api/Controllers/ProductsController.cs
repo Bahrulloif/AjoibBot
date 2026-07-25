@@ -1,5 +1,6 @@
 using AjoibBot.Application.DTOs;
 using AjoibBot.Application.Entities;
+using AjoibBot.Application.Interfaces;
 using AjoibBot.Infrastructure.Data;
 using AjoibBot.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;

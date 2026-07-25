@@ -1,3 +1,4 @@
+using AjoibBot.Application.Interfaces;
 using AjoibBot.Infrastructure.Data;
 using AjoibBot.Infrastructure.Services;
 using AjoibBot.Infrastructure.Services.OpenAi;

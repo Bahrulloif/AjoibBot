@@ -1,4 +1,5 @@
 using AjoibBot.Application.Entities;
+using AjoibBot.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace AjoibBot.Infrastructure.Data;
