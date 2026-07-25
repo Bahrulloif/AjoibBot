@@ -1,3 +1,4 @@
+using AjoibBot.Infrastructure.Services.OpenAi;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
@@ -11,11 +12,16 @@ namespace AjoibBot.Infrastructure.Services;
 public class BotPollingService : BackgroundService
 {
     private readonly ITelegramBotClient _bot;
+    private readonly CatalogAssistantService _assistant;
     private readonly ILogger<BotPollingService> _logger;
 
-    public BotPollingService(ITelegramBotClient bot, ILogger<BotPollingService> logger)
+    public BotPollingService(
+        ITelegramBotClient bot,
+        CatalogAssistantService assistant,
+        ILogger<BotPollingService> logger)
     {
         _bot = bot;
+        _assistant = assistant;
         _logger = logger;
     }
 
@@ -50,9 +56,19 @@ public class BotPollingService : BackgroundService
          message.From?.Id, text);
 
         var chatId = update.Message.Chat.Id;
-        // Example: Echo the received message back to the user
-        await bot.SendMessage(chatId, $"You said: {text}", cancellationToken: ct);
 
+        string reply;
+        try
+        {
+            reply = await _assistant.GetReplyAsync(chatId, text, ct);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get assistant reply for chat {ChatId}", chatId);
+            reply = "Извини, сейчас не получается ответить. Попробуй чуть позже.";
+        }
+
+        await bot.SendMessage(chatId, reply, cancellationToken: ct);
     }
 
     private Task HandleErrorAsync(ITelegramBotClient bot, Exception exception, CancellationToken ct)

@@ -1,8 +1,11 @@
 using AjoibBot.Admin.Api.Controllers;
 using AjoibBot.Application.Entities;
 using AjoibBot.Infrastructure.Data;
+using AjoibBot.Infrastructure.Services;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace AjoibBot.Tests.Controllers;
@@ -11,13 +14,21 @@ public class ProductsControllerTests
 {
     // Общие переменные для всех тестов
     private readonly Mock<IProductRepository> _mockRepo;
+    private readonly Mock<IDistributedCache> _mockCache;
     private readonly ProductsController _controller;
 
     // Конструктор — выполняется перед каждым тестом
     public ProductsControllerTests()
     {
         _mockRepo = new Mock<IProductRepository>();
-        _controller = new ProductsController(_mockRepo.Object);
+        _mockCache = new Mock<IDistributedCache>();
+        _mockCache.Setup(c => c.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                  .ReturnsAsync((byte[]?)null);
+        var cachedService = new CachedProductService(
+            _mockRepo.Object,
+            _mockCache.Object,
+            Mock.Of<ILogger<CachedProductService>>());
+        _controller = new ProductsController(_mockRepo.Object, cachedService);
     }
 
     // ─── Тест 1 ───────────────────────────────────────────

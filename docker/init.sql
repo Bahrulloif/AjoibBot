@@ -15,6 +15,24 @@ CREATE TABLE IF NOT EXISTS products (
     created_at     TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS orders (
+    id             SERIAL PRIMARY KEY,
+    chat_id        BIGINT NOT NULL,
+    customer_name  VARCHAR(150) NOT NULL,
+    customer_phone VARCHAR(30) NOT NULL,
+    status         VARCHAR(20) NOT NULL DEFAULT 'new',
+    created_at     TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS order_items (
+    id           SERIAL PRIMARY KEY,
+    order_id     INTEGER NOT NULL REFERENCES orders(id),
+    product_id   INTEGER NOT NULL REFERENCES products(id),
+    product_name VARCHAR(150) NOT NULL,
+    unit_price   NUMERIC(10,2) NOT NULL,
+    quantity     INTEGER NOT NULL
+);
+
 -- Тестовые данные
 INSERT INTO categories (name) VALUES ('Платья'), ('Костюмы'), ('Куртки');
 INSERT INTO products (name, category_id, price, size, color, stock_quantity)

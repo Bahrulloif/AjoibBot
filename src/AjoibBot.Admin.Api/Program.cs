@@ -15,6 +15,7 @@ builder.Services.AddDbContext<AjoibBotDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<JwtTokenService>();
 // Настройка JWT аутентификации
 builder.Services.AddAuthentication("Bearer")
@@ -57,7 +58,7 @@ builder.Services.AddAuthorization();
 // Redis кэширование
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = "localhost:6379";
+    options.Configuration = builder.Configuration["Redis:Configuration"] ?? "localhost:6379";
     options.InstanceName = "AjoibBot:";
 });
 builder.Services.AddScoped<CachedProductService>();

@@ -14,6 +14,8 @@ public class AjoibBotDbContext : DbContext
     // через него делаешь запросы: _context.Products.ToListAsync()
     public DbSet<Product> Products => Set<Product>();
     public DbSet<Category> Categories => Set<Category>();
+    public DbSet<Order> Orders => Set<Order>();
+    public DbSet<OrderItem> OrderItems => Set<OrderItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -47,6 +49,36 @@ public class AjoibBotDbContext : DbContext
             entity.HasKey(c => c.Id);
             entity.Property(c => c.Id).HasColumnName("id");
             entity.Property(c => c.Name).HasColumnName("name").IsRequired();
+        });
+
+        // Настройка таблицы orders
+        modelBuilder.Entity<Order>(entity =>
+        {
+            entity.ToTable("orders");
+            entity.HasKey(o => o.Id);
+            entity.Property(o => o.Id).HasColumnName("id");
+            entity.Property(o => o.ChatId).HasColumnName("chat_id");
+            entity.Property(o => o.CustomerName).HasColumnName("customer_name").IsRequired();
+            entity.Property(o => o.CustomerPhone).HasColumnName("customer_phone").IsRequired();
+            entity.Property(o => o.Status).HasColumnName("status").IsRequired();
+            entity.Property(o => o.CreatedAt).HasColumnName("created_at");
+        });
+
+        // Настройка таблицы order_items
+        modelBuilder.Entity<OrderItem>(entity =>
+        {
+            entity.ToTable("order_items");
+            entity.HasKey(oi => oi.Id);
+            entity.Property(oi => oi.Id).HasColumnName("id");
+            entity.Property(oi => oi.OrderId).HasColumnName("order_id");
+            entity.Property(oi => oi.ProductId).HasColumnName("product_id");
+            entity.Property(oi => oi.ProductName).HasColumnName("product_name").IsRequired();
+            entity.Property(oi => oi.UnitPrice).HasColumnName("unit_price");
+            entity.Property(oi => oi.Quantity).HasColumnName("quantity");
+
+            entity.HasOne(oi => oi.Order)
+                  .WithMany(o => o.Items)
+                  .HasForeignKey(oi => oi.OrderId);
         });
     }
 }

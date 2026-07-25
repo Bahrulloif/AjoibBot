@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # PostgreSQL база данных
   postgres:
@@ -16,8 +14,18 @@ services:
       - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
 
 
+  # Redis для кэширования
+  redis:
+    image: redis:7
+    container_name: ajoibbot-redis
+    ports:
+      - "6379:6379"
+
   # Admin API
   api:
+    build:
+      context: .
+      dockerfile: src/AjoibBot.Admin.Api/Dockerfile
     image: ajoibbot-admin-api
     container_name: ajoibbot-api
     ports:
@@ -25,12 +33,30 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=ajoibbot;Username=admin;Password=admin123
+      - Redis__Configuration=redis:6379
       - Jwt__Key=AjoibBotSuperSecretKey12345678901234
       - Jwt__Issuer=AjoibBot
       - Jwt__Audience=AjoibBotUsers
       - Jwt__ExpiresInMinutes=60
     depends_on:
       - postgres  # API стартует только после PostgreSQL
+      - redis
+
+  # Telegram-бот
+  bot:
+    build:
+      context: .
+      dockerfile: src/AjoibBot.API/Dockerfile
+    image: ajoibbot-bot
+    container_name: ajoibbot-bot
+    environment:
+      - Telegram__BotToken=${TELEGRAM_BOT_TOKEN}
+      - Telegram__AdminChatId=${TELEGRAM_ADMIN_CHAT_ID}
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=ajoibbot;Username=admin;Password=admin123
+      - OpenAI__ApiKey=${OPENAI_API_KEY}
+      - OpenAI__Model=gpt-4o-mini
+    depends_on:
+      - postgres
 
 volumes:
   postgres_data:  # именованный volume для хранения данных БД
